@@ -1,0 +1,28 @@
+launch_box_root: E:\Games\LaunchBox
+output_directory: E:\Games\export-directory
+platforms:
+  "Nintendo Game Boy": gb
+#  "Nintendo Game Boy Color": gbc
+#  "Nintendo Entertainment System": nes
+  "Nintendo Game Boy Advance": gba
+  "Super Nintendo Entertainment System": snes
+include_universal_games: true
+regions:
+  #  - Asia
+  #  - China
+  #  - Europe
+  #  - France
+  #  - Germany
+  #  - Japan
+  #  - Korea
+  - North America
+  #  - "North America, Europe"
+  #  - Spain
+  #  - "United Kingdom"
+  - "United States"
+#  - World
+
+alt_video_locations:
+  "Super Nintendo Entertainment System": "/Volumes/Junk/Games/LaunchBox/Videos/Super Nintendo Entertainment System"
+  "Nintendo Entertainment System": "/Volumes/Junk/Games/LaunchBox/Videos/Nintendo Entertainment System"
+  "Nintendo Game Boy Advance": "/Volumes/Junk/Games/LaunchBox/Videos/Nintendo Game Boy Advance"
