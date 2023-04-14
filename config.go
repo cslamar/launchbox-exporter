@@ -12,11 +12,13 @@ import (
 	"strings"
 )
 
+// media map between LaunchBox and ES folder mapping
 type media struct {
 	Lb string
 	Es string
 }
 
+// MediaMatches LaunchBox and ES folder mapping group
 var MediaMatches []media
 
 // Config options structure

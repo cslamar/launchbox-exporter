@@ -2,11 +2,9 @@ package main
 
 import (
 	"encoding/xml"
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
 // ES Media Directories
@@ -22,6 +20,9 @@ const (
 	EsTitleScreens  = "titlescreens"
 	EsVideos        = "videos"
 )
+
+// EsTimeFormat time format for ES entries
+const EsTimeFormat = "20060102T000000"
 
 type EsGame struct {
 	XMLName     xml.Name `xml:"game"`
@@ -77,13 +78,4 @@ func WriteEsGameList(config Config, lbGames []LbGame, platform string) error {
 	}
 
 	return nil
-}
-
-// parseEsImageName returns an image path for EsGame
-func parseEsImagePath(srcImgPath, esPath string) string {
-	ext := filepath.Ext(filepath.Base(srcImgPath))
-	esExt := filepath.Ext(esPath)
-	esImg := fmt.Sprintf("%s%s", strings.TrimSuffix(esPath, esExt), ext)
-
-	return esImg
 }

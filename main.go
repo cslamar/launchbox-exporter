@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"flag"
 	"fmt"
+	"github.com/mattn/go-colorable"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"path"
@@ -13,11 +14,10 @@ import (
 	"time"
 )
 
-const EsTimeFormat = "20060102T000000"
-
 func init() {
 	log.SetLevel(log.InfoLevel)
 	log.SetFormatter(&log.TextFormatter{
+		ForceColors:            true,
 		FullTimestamp:          true,
 		DisableTimestamp:       true,
 		DisableLevelTruncation: true,
@@ -26,12 +26,14 @@ func init() {
 			callerFuncParts := strings.Split(f.Function, "/")
 			callerFunc := callerFuncParts[len(callerFuncParts)-1]
 			return fmt.Sprintf("%s()", callerFunc), fmt.Sprintf(" %s:%d", filename, f.Line)
-			//return fmt.Sprintf("%s()", f.Function), fmt.Sprintf(" %s:%d", filename, f.Line)
 		},
 	})
 
 	// default report caller to be off
 	log.SetReportCaller(false)
+
+	// enable colors for Windows
+	log.SetOutput(colorable.NewColorableStdout())
 }
 
 func main() {
@@ -51,7 +53,6 @@ func main() {
 
 	if *debugPtr {
 		log.SetLevel(log.DebugLevel)
-		//log.SetReportCaller(true)
 	}
 
 	config, err := NewConfig(*configFilePtr)
@@ -112,7 +113,6 @@ func main() {
 			log.Println("copying rom files for", lbPlatform)
 			for idx, lbGame := range foundGames {
 				fmt.Printf("(%s - roms) [%d/%d] ", esPlatform, idx+1, len(foundGames))
-				//esGame := lbGame.ConvertToEsGame()
 				if err := config.copyRomFiles(lbPlatform, lbGame); err != nil {
 					log.Errorln("error copying rom:", err)
 					continue
@@ -149,7 +149,6 @@ func main() {
 			log.Infoln("copying videos")
 			for idx, lbGame := range foundGames {
 				fmt.Printf("(%s - videos) [%d/%d] ", esPlatform, idx+1, len(foundGames))
-				//esGame := lbGame.ConvertToEsGame()
 				if err := config.copyAltVideoFiles(lbPlatform, lbGame.EsGame); err != nil {
 					log.Warnln(err)
 					continue
