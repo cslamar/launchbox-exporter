@@ -1,0 +1,48 @@
+name: "Build and Release LaunchBox Exporter"
+on:
+  push:
+    # run only against tags
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+  # packages: write
+  # issues: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: git fetch --force --tags
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '>=1.20'
+          cache: true
+      # More assembly might be required: Docker logins, GPG, etc. It all depends
+      # on your needs.
+      - name: Import Code-Signing Certificates for macOS
+        uses: Apple-Actions/import-codesign-certs@v2
+        with:
+          # The certificates in a PKCS12 file encoded as a base64 string
+          p12-file-base64: ${{ secrets.PROD_MACOS_CERTIFICATE }}
+          # The password used to import the PKCS12 file.
+          p12-password: ${{ secrets.PROD_MACOS_CERTIFICATE_PWD }}
+      - name: Set Secrets
+        run: |
+          echo "PROD_MACOS_NOTARIZATION_APPLE_ID=${{ secrets.PROD_MACOS_NOTARIZATION_APPLE_ID }}" >> $GITHUB_ENV
+          echo "PROD_MACOS_NOTARIZATION_TEAM_ID=${{ secrets.PROD_MACOS_NOTARIZATION_TEAM_ID }}" >> $GITHUB_ENV
+          echo "PROD_MACOS_NOTARIZATION_PWD=${{ secrets.PROD_MACOS_NOTARIZATION_PWD }}" >> $GITHUB_ENV
+          echo "PROD_MACOS_CERTIFICATE_NAME=${{ secrets.PROD_MACOS_CERTIFICATE_NAME }}" >> $GITHUB_ENV
+      - uses: goreleaser/goreleaser-action@v4
+        with:
+          # either 'goreleaser' (default) or 'goreleaser-pro':
+          distribution: goreleaser
+          version: latest
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # This may need to be a PAT

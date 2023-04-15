@@ -15,59 +15,43 @@ builds:
       - amd64
       - arm64
 
-  - id: launchbox-exporter-macos-amd64
+  - id: launchbox-exporter-macos
     env:
       - CGO_ENABLED=0
     goos:
       - darwin
     goarch:
       - amd64
-    hooks:
-      post:
-        - 'codesign -s "{{ .Env.PROD_MACOS_CERTIFICATE_NAME }}" "{{ .Path }}"'
-
-  - id: launchbox-exporter-macos-arm64
-    env:
-      - CGO_ENABLED=0
-    goos:
-      - darwin
-    goarch:
       - arm64
     hooks:
       post:
         - 'codesign -s "{{ .Env.PROD_MACOS_CERTIFICATE_NAME }}" "{{ .Path }}"'
 
+universal_binaries:
+  - id: macos
+    ids:
+      - launchbox-exporter-macos
+    replace: true
+    hooks:
+      post:
+        - /usr/bin/codesign --force -s "{{ .Env.PROD_MACOS_CERTIFICATE_NAME }}" --options runtime {{ .Path }} -v
+
 archives:
-  - id: lin-win
+  - id: linux-windows
     builds:
       - launchbox-exporter-windows-linux
     format: tar.gz
-    # this name template makes the OS and Arch compatible with the results of uname.
-    name_template: >-
-      {{ .ProjectName }}_
-      {{- if eq .Os "darwin" }}macos{{- else }}{{ .Os }}{{ end }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    name_template: '{{ .ProjectName }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x86_64{{- else }}{{ .Arch }}{{ end }}'
     # use zip for windows
     format_overrides:
     - goos: windows
       format: zip
 
-  - id: macos
+  - id: macos_universal
     builds:
-      - launchbox-exporter-macos-amd64
-      - launchbox-exporter-macos-arm64
+      - macos
     format: zip
-    # this name template makes the OS and Arch compatible with the results of uname.
-    name_template: >-
-      {{ .ProjectName }}_
-      {{- if eq .Os "darwin" }}macos{{- else }}{{ .Os }}{{ end }}_
-      {{- if eq .Arch "amd64" }}x86_64
-      {{- else if eq .Arch "386" }}i386
-      {{- else }}{{ .Arch }}{{ end }}
-      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    name_template: '{{ .ProjectName }}_macos_universal'
 
 checksum:
   name_template: 'checksums.txt'
@@ -84,7 +68,7 @@ signs:
   - id: macos
     artifacts: archive
     ids:
-      - macos
+      - macos_universal
     signature: "${artifact}"
     output: true
     cmd: xcrun
@@ -92,7 +76,7 @@ signs:
       [
         "notarytool",
         "submit",
-        '${artifact}',
+        './dist/{{ .ProjectName }}_macos_universal.zip',
         "--apple-id",
         "{{ .Env.PROD_MACOS_NOTARIZATION_APPLE_ID }}",
         "--password",
@@ -104,9 +88,9 @@ signs:
       ]
 
 release:
-  github:
-    owner: cslamar
-    name: launchbox-exporter
+  ids:
+    - linux-windows
+    - macos
 
 # The lines beneath this are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/use them.
