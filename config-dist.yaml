@@ -9,15 +9,20 @@ platforms:
 include_universal_games: true
 regions:
   #  - Asia
+  #  - Australia
   #  - China
   #  - Europe
   #  - France
   #  - Germany
+  #  - Italy
   #  - Japan
+  #  - "Japan, North America"
   #  - Korea
-  - North America
+  - "North America"
+  # - "North America, Australia"
   #  - "North America, Europe"
   #  - Spain
+  #  - "The Netherlands"
   #  - "United Kingdom"
   - "United States"
 #  - World

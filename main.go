@@ -44,6 +44,7 @@ func main() {
 	copyRoms := flag.Bool("roms", false, "copy found roms")
 	copyVideos := flag.Bool("videos", false, "copy found videos")
 	debugPtr := flag.Bool("debug", false, "enable debug logging")
+	regionsPtr := flag.Bool("regions", false, "print regions in systems collections")
 
 	flag.Parse()
 
@@ -81,6 +82,23 @@ func main() {
 
 		if err := decoder.Decode(&lbGames); err != nil {
 			log.Fatalln(err)
+		}
+
+		if *regionsPtr {
+			regions := make([]string, 0)
+			for _, game := range lbGames.Games {
+				if !checkIfInSlice(game.Region, regions) {
+					regions = append(regions, game.Region)
+				}
+			}
+			log.Infoln("Regions found")
+			log.Infoln("-------")
+			for _, region := range regions {
+				if region == "" {
+					continue
+				}
+				log.Infoln(region)
+			}
 		}
 
 		log.Println("number of parsed LaunchBox games:", len(lbGames.Games))
